@@ -1,0 +1,345 @@
+@use './variables.scss' as *;
+
+// Global Reset & Base Styles
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-body;
+  line-height: $line-height-base;
+  color: $color-neutral-10;
+  background-color: $color-neutral-2;
+}
+
+// Arco Design Overrides
+.arco-layout {
+  background: transparent;
+}
+
+.arco-layout-sider {
+  background: $color-neutral-1;
+  box-shadow: $shadow-md;
+}
+
+.arco-layout-header {
+  background: $color-neutral-1;
+  border-bottom: 1px solid $color-neutral-4;
+}
+
+.arco-layout-content {
+  padding: $spacing-6;
+  min-height: calc(100vh - #{$header-height});
+}
+
+// Card Styles
+.material-card {
+  background: $color-neutral-1;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-sm;
+  transition: box-shadow $transition-base;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+
+  .card-header {
+    padding: $spacing-4 $spacing-5;
+    border-bottom: 1px solid $color-neutral-4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-body {
+    padding: $spacing-5;
+  }
+}
+
+// Material Type Badges
+.badge-video {
+  background: rgba($color-video, 0.1);
+  color: $color-video;
+}
+
+.badge-image {
+  background: rgba($color-image, 0.1);
+  color: $color-image;
+}
+
+.badge-audio {
+  background: rgba($color-audio, 0.1);
+  color: $color-audio;
+}
+
+.badge-aigc {
+  background: rgba($color-aigc, 0.1);
+  color: $color-aigc;
+}
+
+// Status Indicators
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: $spacing-2;
+
+  &.status-success {
+    background: $color-success-6;
+  }
+
+  &.status-warning {
+    background: $color-warning-6;
+  }
+
+  &.status-error {
+    background: $color-error-6;
+  }
+
+  &.status-processing {
+    background: $color-primary-6;
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Upload Zone
+.upload-zone {
+  border: 2px dashed $color-neutral-5;
+  border-radius: $border-radius-lg;
+  padding: $spacing-10;
+  text-align: center;
+  transition: all $transition-base;
+  cursor: pointer;
+
+  &:hover,
+  &.drag-over {
+    border-color: $color-primary-6;
+    background: $color-primary-1;
+  }
+
+  .upload-icon {
+    font-size: 48px;
+    color: $color-neutral-6;
+    margin-bottom: $spacing-4;
+  }
+
+  .upload-text {
+    color: $color-neutral-8;
+    margin-bottom: $spacing-2;
+  }
+
+  .upload-hint {
+    color: $color-neutral-6;
+    font-size: $font-size-caption;
+  }
+}
+
+// Stats Cards
+.stat-card {
+  background: $color-neutral-1;
+  border-radius: $border-radius-lg;
+  padding: $spacing-5;
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  transition: transform $transition-base;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: $border-radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+
+    &.icon-primary {
+      background: $color-primary-1;
+      color: $color-primary-6;
+    }
+
+    &.icon-success {
+      background: $color-success-1;
+      color: $color-success-6;
+    }
+
+    &.icon-warning {
+      background: $color-warning-1;
+      color: $color-warning-6;
+    }
+  }
+
+  .stat-content {
+    flex: 1;
+
+    .stat-value {
+      font-size: $font-size-title;
+      font-weight: $font-weight-bold;
+      color: $color-neutral-10;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: $font-size-caption;
+      color: $color-neutral-7;
+      margin-top: $spacing-1;
+    }
+  }
+}
+
+// Material Grid
+.material-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: $spacing-4;
+}
+
+.material-item {
+  background: $color-neutral-1;
+  border-radius: $border-radius-md;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all $transition-base;
+  border: 1px solid $color-neutral-4;
+
+  &:hover {
+    border-color: $color-primary-4;
+    box-shadow: $shadow-md;
+  }
+
+  &.selected {
+    border-color: $color-primary-6;
+    box-shadow: 0 0 0 2px rgba($color-primary-6, 0.2);
+  }
+
+  .material-preview {
+    aspect-ratio: 16/9;
+    background: $color-neutral-3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img,
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .material-icon {
+      font-size: 32px;
+      color: $color-neutral-6;
+    }
+  }
+
+  .material-info {
+    padding: $spacing-3;
+
+    .material-name {
+      font-size: $font-size-body;
+      font-weight: $font-weight-medium;
+      color: $color-neutral-10;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .material-meta {
+      font-size: $font-size-caption;
+      color: $color-neutral-7;
+      margin-top: $spacing-1;
+      display: flex;
+      gap: $spacing-3;
+    }
+  }
+}
+
+// Progress Bar
+.progress-bar {
+  height: 4px;
+  background: $color-neutral-4;
+  border-radius: $border-radius-full;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, $color-primary-6, $color-primary-4);
+    border-radius: $border-radius-full;
+    transition: width $transition-base;
+  }
+}
+
+// Table Styles
+.arco-table {
+  .arco-table-th {
+    background: $color-neutral-2;
+    font-weight: $font-weight-medium;
+  }
+
+  .arco-table-tr:hover .arco-table-td {
+    background: $color-primary-1;
+  }
+}
+
+// Modal Styles
+.arco-modal {
+  border-radius: $border-radius-lg;
+
+  .arco-modal-header {
+    padding: $spacing-5;
+    border-bottom: 1px solid $color-neutral-4;
+  }
+
+  .arco-modal-body {
+    padding: $spacing-5;
+  }
+}
+
+// Animation Classes
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $transition-base;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all $transition-base;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
