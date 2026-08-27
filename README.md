@@ -2,6 +2,15 @@
 
 基于 **Arco Pro + Vue 3 + TypeScript** 的巨量引擎素材库管理前端实现，遵循 SaaS 通用设计模式。
 
+## 在线访问
+
+**https://fenglaoban173.github.io/material-system/**
+
+登录页已预填演示账号（`admin` / `123456`），直接点击「登录」即可进入系统。
+当前所有数据均为前端 mock 数据，无需后端服务即可完整浏览全部页面。
+
+> 每次向 `main` 分支推送代码后，GitHub Actions 会自动构建并重新发布到上述地址。
+
 ## 项目特性
 
 ### 技术栈
@@ -115,6 +124,14 @@ npm run build
 ```bash
 npm run preview
 ```
+
+### 类型检查
+```bash
+npm run type-check
+```
+
+> 类型检查已从 `npm run build` 中拆出单独执行。`vite build` 本身不做类型校验，
+> 这样存量的 TS 告警不会阻塞构建与自动部署；需要检查类型时单独运行上面的命令即可。
 
 ## API 接口
 
