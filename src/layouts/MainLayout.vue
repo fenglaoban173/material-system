@@ -39,7 +39,7 @@
         <template v-for="route in menuRoutes" :key="route.path">
           <a-sub-menu v-if="route.children?.length" :key="route.path">
             <template #icon>
-              <component :is="getIcon(route.meta?.icon)" />
+              <component :is="getIcon(route.meta?.icon as string | undefined)" />
             </template>
             <template #title>{{ route.meta?.title }}</template>
             <a-menu-item
@@ -47,14 +47,14 @@
               :key="child.path"
             >
               <template #icon>
-                <component :is="getIcon(child.meta?.icon)" />
+                <component :is="getIcon(child.meta?.icon as string | undefined)" />
               </template>
               {{ child.meta?.title }}
             </a-menu-item>
           </a-sub-menu>
           <a-menu-item v-else :key="route.path">
             <template #icon>
-              <component :is="getIcon(route.meta?.icon)" />
+              <component :is="getIcon(route.meta?.icon as string | undefined)" />
             </template>
             {{ route.meta?.title }}
           </a-menu-item>
@@ -156,14 +156,12 @@ import {
 } from '@arco-design/web-vue/es/icon'
 import BreadcrumbNav from './components/BreadcrumbNav.vue'
 import NotificationPanel from './components/NotificationPanel.vue'
-import type { RouteRecordRaw } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
 const collapsed = ref(false)
-const searchKeyword = ref('')
 const openKeys = ref<string[]>([])
 const bellPopover = ref(false)
 // 通知子组件引用（弹窗 mount 后赋值）
@@ -219,15 +217,6 @@ const toggleCollapse = () => {
 
 const handleMenuClick = (key: string) => {
   router.push(key)
-}
-
-const handleSearch = () => {
-  if (searchKeyword.value) {
-    router.push({
-      path: '/material/list',
-      query: { keyword: searchKeyword.value },
-    })
-  }
 }
 
 const goToSettings = () => {

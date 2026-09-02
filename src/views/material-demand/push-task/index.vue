@@ -56,7 +56,7 @@
           <a-table-column title="操作人" data-index="operator" />
           <a-table-column title="操作">
             <template #cell="{ record }">
-              <a-button type="text" size="small" @click="handlePushRecord(record)">推送记录</a-button>
+              <a-button type="text" size="small" @click="handlePushRecord()">推送记录</a-button>
               <a-button type="text" size="small" @click="handleRePush(record)">重新推送</a-button>
             </template>
           </a-table-column>
@@ -185,7 +185,7 @@ const handleReset = () => {
   queryForm.status = ''
 }
 
-const handlePushRecord = (record: any) => {
+const handlePushRecord = () => {
   showPushRecordDialog.value = true
 }
 

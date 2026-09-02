@@ -24,8 +24,8 @@
               :row-selection="{
                 type: 'checkbox',
                 selectedRowKeys: selectedIds,
-                onChange: handleSelectionChange,
               }"
+              @selection-change="handleSelectionChange"
             >
               <template #columns>
                 <a-table-column title="素材" data-index="name">
@@ -39,12 +39,12 @@
                     </div>
                   </template>
                 </a-table-column>
-                <a-table-column title="类型" data-index="type" width="100">
+                <a-table-column title="类型" data-index="type" :width="100">
                   <template #cell="{ record }">
                     <a-tag :color="getTypeColor(record.type)">{{ record.type }}</a-tag>
                   </template>
                 </a-table-column>
-                <a-table-column title="上传时间" data-index="createTime" width="180" />
+                <a-table-column title="上传时间" data-index="createTime" :width="180" />
               </template>
             </a-table>
           </div>
@@ -124,7 +124,7 @@ import { Message } from '@arco-design/web-vue'
 import { IconSafe, IconCloseCircle, IconInfoCircle } from '@arco-design/web-vue/es/icon'
 import type { Material, PreAuditResult } from '@/types/material'
 
-const selectedIds = ref<number[]>([])
+const selectedIds = ref<(string | number)[]>([])
 const submitting = ref(false)
 const auditResults = ref<PreAuditResult[]>([])
 
@@ -151,7 +151,7 @@ const getTypeColor = (type?: string) => {
   return colors[type || 'VIDEO']
 }
 
-const handleSelectionChange = (keys: number[]) => {
+const handleSelectionChange = (keys: (string | number)[]) => {
   selectedIds.value = keys
 }
 
@@ -168,7 +168,7 @@ const submitAudit = async () => {
   
   // Mock results
   auditResults.value = selectedIds.value.map(id => ({
-    materialId: id,
+    materialId: Number(id),
     status: Math.random() > 0.3 ? 'PASS' : Math.random() > 0.5 ? 'WARNING' : 'REJECT',
     rejectReasons: Math.random() > 0.7 ? ['包含敏感词汇', '画质不清晰'] : undefined,
     suggestions: Math.random() > 0.6 ? ['建议使用更高分辨率', '调整亮度对比度'] : undefined,

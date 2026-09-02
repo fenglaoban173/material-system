@@ -75,7 +75,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconCloudUpload } from '@arco-design/web-vue/es/icon'
 
 const analysisResult = ref<any>(null)
 

@@ -233,14 +233,6 @@ const activeRatio = computed(() => ((stats.activeCount / stats.totalCount) * 100
 const pendingRatio = computed(() => ((stats.pendingCount / stats.totalCount) * 100).toFixed(1))
 
 // ========== 工具方法 ==========
-const formatSize = (bytes: number) => {
-  if (!bytes) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
-}
-
 // ========== 上传趋势 ==========
 const trendRange = ref<'7' | '14' | '30'>('14')
 
@@ -564,80 +556,6 @@ const topOption = computed(() => ({
     },
   ],
 }))
-
-// ========== 存储趋势(面积图) ==========
-const storageOption = computed(() => {
-  const labels: string[] = []
-  const used: number[] = []
-  const today = new Date()
-  let baseUsed = stats.storageUsed - 80 * 1024 * 1024 * 1024
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(today)
-    d.setDate(today.getDate() - i)
-    labels.push(`${d.getMonth() + 1}/${d.getDate()}`)
-    baseUsed += Math.floor(Math.random() * 15 * 1024 * 1024 * 1024)
-    used.push(Math.round(baseUsed / (1024 * 1024 * 1024)))
-  }
-  return {
-    tooltip: {
-      trigger: 'axis',
-      formatter: (params: unknown) => {
-        const arr = params as Array<{ axisValueLabel: string; value: number }>
-        return `${arr[0].axisValueLabel}<br/>已用: ${arr[0].value} GB`
-      },
-    },
-    grid: { left: '3%', right: '4%', bottom: '8%', top: '12%', containLabel: true },
-    xAxis: {
-      type: 'category',
-      data: labels,
-      axisLine: { lineStyle: { color: '#e5e6eb' } },
-      axisLabel: { color: '#86909c', fontSize: 12 },
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      splitLine: { lineStyle: { color: '#f0f1f3', type: 'dashed' } },
-      axisLabel: { color: '#86909c', fontSize: 12, formatter: '{value} GB' },
-    },
-    series: [
-      {
-        type: 'line',
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 6,
-        data: used,
-        lineStyle: { width: 2.5, color: '#13c2c2' },
-        itemStyle: { color: '#13c2c2' },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(19,194,194,0.35)' },
-              { offset: 1, color: 'rgba(19,194,194,0)' },
-            ],
-          },
-        },
-        markLine: {
-          symbol: 'none',
-          lineStyle: { color: '#f5222d', type: 'dashed' },
-          label: { formatter: '容量上限 1024 GB', color: '#f5222d', fontSize: 11 },
-          data: [{ yAxis: 1024 }],
-        },
-      },
-    ],
-  }
-})
-
-// ========== 即将到期素材 ==========
-const expiringMaterials = ref([
-  { id: 1, name: 'spring_festival_teaser.mp4', size: 524288000, days: 3 },
-  { id: 2, name: 'valentine_promo_30s.mp4', size: 314572800, days: 5 },
-  { id: 3, name: 'q1_summary_v1.mp4', size: 1073741824, days: 7 },
-  { id: 4, name: 'flash_sale_banner.mp4', size: 209715200, days: 12 },
-  { id: 5, name: 'old_brand_video.mp4', size: 838860800, days: 18 },
-  { id: 6, name: 'legacy_demo.mp4', size: 419430400, days: 25 },
-])
 </script>
 
 <style scoped lang="scss">

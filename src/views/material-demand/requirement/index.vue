@@ -75,8 +75,16 @@
             <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
           </template>
         </a-table-column>
-        <a-table-column title="需求ID" data-index="demandId" :width="180" />
-        <a-table-column title="需求名称" data-index="name" :width="180" />
+        <a-table-column title="需求ID" data-index="demandId" :width="180">
+          <template #cell="{ record }">
+            <span class="link-text" @click="handleDetail(record)">{{ record.demandId }}</span>
+          </template>
+        </a-table-column>
+        <a-table-column title="需求名称" data-index="name" :width="180">
+          <template #cell="{ record }">
+            <span class="link-text" @click="handleDetail(record)">{{ record.name }}</span>
+          </template>
+        </a-table-column>
         <a-table-column title="需求类型" data-index="source" :width="100">
           <template #cell="{ record }">
             <a-tag :color="getSourceColor(record.source)">{{ record.source }}</a-tag>
@@ -126,12 +134,13 @@
           </template>
         </a-table-column>
         <a-table-column title="需求创建人" data-index="creator" :width="120" />
-        <a-table-column title="操作" :width="480" :fixed="'right'" align="center">
+        <a-table-column title="操作" :width="540" :fixed="'right'" align="center">
           <template #cell="{ record }">
             <div style="display: flex; gap: 8px;">
               <a-button type="text" size="small" @click="handleDetail(record)"><span style="color:#165DFF">详情</span></a-button>
               <a-button type="text" size="small" @click="handleCopy(record)"><span style="color:#722ED1">复制</span></a-button>
               <a-button type="text" size="small" @click="handleVideoAssignInRow(record)"><span style="color:#165DFF">视频分配</span></a-button>
+              <a-button type="text" size="small" :disabled="record.status !== 'PROCESSING'" @click="handleAudit(record)"><span :style="{ color: record.status === 'PROCESSING' ? '#00B42A' : '#C9CDD4' }">审核</span></a-button>
               <a-button type="text" size="small" :disabled="record.status !== 'PROCESSING'" @click="handleConfirmComplete(record)"><span :style="{ color: record.status === 'PROCESSING' ? '#165DFF' : '#C9CDD4' }">确认完成</span></a-button>
               <a-button type="text" size="small" :disabled="record.status !== 'PENDING'" @click="handleRevoke(record)"><span :style="{ color: record.status === 'PENDING' ? '#F53F3F' : '#C9CDD4' }">撤销</span></a-button>
             </div>
@@ -182,7 +191,7 @@
               :bordered="{ cell: true }"
               row-key="__idx"
               class="material-items-table"
-              :row-class="(record, idx) => isDuplicateRow(createForm.materialItems, idx) ? 'row-duplicate' : ''"
+              :row-class="(_record, idx) => isDuplicateRow(createForm.materialItems, idx) ? 'row-duplicate' : ''"
             >
               <template #columns>
                 <a-table-column :width="200">
@@ -366,7 +375,7 @@
               :bordered="{ cell: true }"
               row-key="__idx"
               class="material-items-table"
-              :row-class="(record, idx) => isDuplicateRow(copyForm.materialItems, idx) ? 'row-duplicate' : ''"
+              :row-class="(_record, idx) => isDuplicateRow(copyForm.materialItems, idx) ? 'row-duplicate' : ''"
             >
               <template #columns>
                 <a-table-column :width="200">
@@ -916,6 +925,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   IconPlus,
   IconFile,
@@ -934,11 +944,11 @@ import type { MaterialItem } from '@/types/material'
 import { Message, Modal } from '@arco-design/web-vue'
 
 const loading = ref(false)
+const router = useRouter()
 const showCreateDrawer = ref(false)
 const showCopyDrawer = ref(false)
 const showDetailModal = ref(false)
 const detailRecord = ref<any>(null)
-const playingVideos = reactive<Record<number, boolean>>({})
 const showVideoModal = ref(false)
 const currentVideoSrc = ref('')
 const showVideoAssignModal = ref(false)
@@ -1671,13 +1681,23 @@ const handleVideoAssignConfirm = () => {
   }
 }
 
-const handleVideoAssign = (record: any) => {
-  Message.info('视频分配功能开发中')
-}
-
 const handleDetail = (record: any) => {
   detailRecord.value = record
   showDetailModal.value = true
+}
+
+const handleAudit = (record: any) => {
+  if (record.status !== 'PROCESSING') {
+    Message.warning('仅进行中状态的需求可发起审核')
+    return
+  }
+  router.push({
+    path: '/material-lib/audit',
+    query: {
+      demandId: record.demandId,
+      demandName: record.name,
+    },
+  })
 }
 
 const handleCopy = (record: any) => {
@@ -1754,10 +1774,6 @@ const formatCurrency = (value?: number | string): string => {
   return num.toLocaleString('en-US', { maximumFractionDigits: 2 })
 }
 
-const getPriorityColor = (priority: string) => {
-  return priority === '高' ? 'red' : priority === '中' ? 'orange' : 'green'
-}
-
 const getStatusColor = (status: string) => {
   const colors: Record<string, string> = {
     'PENDING': 'orange',
@@ -1801,19 +1817,6 @@ const captureThumbnail = (index: number) => {
       }
       video.removeEventListener('seeked', handler)
     })
-  }
-}
-
-const toggleVideo = (index: number) => {
-  const video = document.getElementById(`video-${index}`) as HTMLVideoElement
-  if (video) {
-    if (playingVideos[index]) {
-      video.pause()
-      playingVideos[index] = false
-    } else {
-      video.play()
-      playingVideos[index] = true
-    }
   }
 }
 </script>
@@ -1883,6 +1886,17 @@ const toggleVideo = (index: number) => {
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
+  }
+
+  .link-text {
+    color: #165DFF;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover {
+      opacity: 0.75;
+      text-decoration: underline;
+    }
   }
 
   .drawer-form {

@@ -189,9 +189,9 @@ const img2videoSettings = reactive({
 
 const selectedMaterials = ref([])
 const transferData = ref([
-  { value: 1, label: 'AI生成素材-1' },
-  { value: 2, label: 'AI生成素材-2' },
-  { value: 3, label: 'AI生成素材-3' },
+  { value: '1', label: 'AI生成素材-1', disabled: false },
+  { value: '2', label: 'AI生成素材-2', disabled: false },
+  { value: '3', label: 'AI生成素材-3', disabled: false },
 ])
 
 const handleDragStart = (e: DragEvent, element: any) => {

@@ -93,19 +93,19 @@
                     </div>
                   </template>
                 </a-table-column>
-                <a-table-column title="权限" data-index="permission" width="100">
+                <a-table-column title="权限" data-index="permission" :width="100">
                   <template #cell="{ record }">
                     <a-tag :color="record.permission === 'WRITE' ? 'blue' : 'green'">
                       {{ record.permission === 'WRITE' ? '读写' : '只读' }}
                     </a-tag>
                   </template>
                 </a-table-column>
-                <a-table-column title="有效期至" data-index="expiry" width="180" />
-                <a-table-column title="操作" width="150" fixed="right">
+                <a-table-column title="有效期至" data-index="expiry" :width="180" />
+                <a-table-column title="操作" :width="150" fixed="right">
                   <template #cell="{ record }">
                     <a-space>
                       <a-button type="text" size="small" @click="editShare(record)">编辑</a-button>
-                      <a-button type="text" size="small" status="danger" @click="cancelShare(record)">取消</a-button>
+                      <a-button type="text" size="small" status="danger" @click="cancelShare()">取消</a-button>
                     </a-space>
                   </template>
                 </a-table-column>
@@ -177,7 +177,7 @@ const editShare = (record: any) => {
   Message.info('编辑共享: ' + record.id)
 }
 
-const cancelShare = (record: any) => {
+const cancelShare = () => {
   Modal.confirm({
     title: '确认取消共享',
     content: '取消后目标账号将无法访问这些素材',

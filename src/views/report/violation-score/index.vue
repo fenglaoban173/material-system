@@ -80,12 +80,24 @@
         @page-size-change="handlePageSizeChange"
       >
         <template #columns>
-          <a-table-column title="违规单ID" data-index="event_id" :width="120" :fixed="'left'" />
-          <a-table-column title="客户ID" data-index="advertiser_id" :width="120" />
-          <a-table-column title="计划ID" data-index="ad_id" :width="120" />
+          <a-table-column title="违规单ID" data-index="event_id" :width="120" :fixed="'left'">
+            <template #cell="{ record }">
+              <span class="link-text" @click="handleDetail(record)">{{ record.event_id }}</span>
+            </template>
+          </a-table-column>
+          <a-table-column title="客户ID" data-index="advertiser_id" :width="120">
+            <template #cell="{ record }">
+              <span class="link-text" @click="handleDetail(record)">{{ record.advertiser_id }}</span>
+            </template>
+          </a-table-column>
+          <a-table-column title="计划ID" data-index="ad_id" :width="120">
+            <template #cell="{ record }">
+              <span class="link-text" @click="handleDetail(record)">{{ record.ad_id }}</span>
+            </template>
+          </a-table-column>
           <a-table-column title="素材ID" data-index="material_id" :width="160">
             <template #cell="{ record }">
-              <span class="code-text">{{ record.material_id }}</span>
+              <span class="link-text" @click="handleDetail(record)">{{ record.material_id }}</span>
             </template>
           </a-table-column>
           <a-table-column title="业务线" data-index="business_line" :width="100">
@@ -255,7 +267,7 @@ import {
   IconExclamationCircle,
   IconImage,
 } from '@arco-design/web-vue/es/icon'
-import { Message, Modal } from '@arco-design/web-vue'
+import { Message } from '@arco-design/web-vue'
 import {
   VIOLATION_STATUS_MAP,
   ILLEGAL_TYPE_MAP,
@@ -432,11 +444,6 @@ const getIllegalTypeColor = (type?: string) => {
   return 'gray'
 }
 
-// 申诉：仅生效中（VALID）且未申诉、未超时、平台允许申诉的状态可发起
-const canAppeal = (status: ViolationStatus) => {
-  return status === 'VALID'
-}
-
 const handleSearch = () => {
   loading.value = true
   // TODO: 联调后替换为 getViolationScoreList 调用
@@ -476,19 +483,6 @@ const handlePageSizeChange = (pageSize: number) => {
 const handleDetail = (record: ViolationScoreEvent) => {
   detailRecord.value = record
   showDetailModal.value = true
-}
-
-const handleAppeal = (record: ViolationScoreEvent) => {
-  Modal.confirm({
-    title: '提交申诉',
-    content: `确定要对违规单「${record.event_id}」发起申诉吗？`,
-    okText: '确定申诉',
-    cancelText: '取消',
-    onOk: () => {
-      Message.success(`违规单 ${record.event_id} 申诉已提交`)
-      record.status = 'ONAPPEAL'
-    },
-  })
 }
 
 const buildPayload = () => {
@@ -590,6 +584,17 @@ const buildPayload = () => {
     font-family: Monaco, Consolas, monospace;
     font-size: 12px;
     color: var(--color-text-2);
+  }
+
+  .link-text {
+    color: #165DFF;
+    cursor: pointer;
+    transition: opacity 0.15s;
+
+    &:hover {
+      opacity: 0.75;
+      text-decoration: underline;
+    }
   }
 
   .desc-text {

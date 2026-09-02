@@ -68,7 +68,11 @@
               </div>
             </template>
           </a-table-column>
-          <a-table-column title="需求名称" data-index="demandName" :width="200" />
+          <a-table-column title="需求名称" data-index="demandName" :width="200">
+            <template #cell="{ record }">
+              <span class="link-text" @click="handleDetails(record)">{{ record.demandName }}</span>
+            </template>
+          </a-table-column>
           <a-table-column title="状态" :width="100">
             <template #cell="{ record }">
               <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
@@ -855,6 +859,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import { IconImage, IconPlus, IconClose, IconUpload, IconFile } from '@arco-design/web-vue/es/icon'
 
@@ -867,6 +872,12 @@ const filters = reactive({
   createRange: [] as string[],
   createRangeEnd: [] as string[],
 })
+
+// 从需求管理跳转过来时,自动带出需求名称作为筛选条件
+const route = useRoute()
+if (route.query.demandName) {
+  filters.demandName = String(route.query.demandName)
+}
 
 const creatorOptions = [
   '王春雷',
@@ -1645,6 +1656,17 @@ const usageBadgeClass = (status?: string) => {
   background: #ffffff;
   border-radius: 4px;
   padding: 16px;
+}
+
+.link-text {
+  color: #165DFF;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.75;
+    text-decoration: underline;
+  }
 }
 
 .material-cell {

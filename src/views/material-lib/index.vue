@@ -1039,6 +1039,7 @@
             <span class="filter-label">使用状态：</span>
             <a-radio-group v-model="filterUsage" type="button" size="small">
               <a-radio value="">全部</a-radio>
+              <a-radio value="NOT_PUSHED">未推送</a-radio>
               <a-radio value="UNUSED">未使用</a-radio>
               <a-radio value="ZERO_CONSUME">无消耗</a-radio>
               <a-radio value="CONSUMING">有消耗</a-radio>
@@ -1308,11 +1309,9 @@ import {
   IconAlignLeft,
   IconVideoCamera,
   IconImage,
-  IconFileAudio,
   IconCaretRight,
   IconMore,
   IconDown,
-  IconCloud,
   IconClose,
   IconQuestionCircle,
   IconInfoCircle,
@@ -1376,7 +1375,6 @@ const pushForm = ref({
 })
 const pushSearchKeyword = ref('')
 const pushSelectAll = ref(false)
-const pushCurrentPage = ref(1)
 const pushAccounts = ref([
   { id: 1, name: '抖音账户A（官方）', selected: false },
   { id: 2, name: '抖音账户B（代理）', selected: false },
@@ -1820,24 +1818,6 @@ const detailMediaFilter = ref('all')
 const detailDateRange = ref<string[]>(['2026-07-09', '2026-07-15'])
 const adsMediaTab = ref('all')
 
-// 媒体审核（素材审核 Tab）
-const auditMediaTab = ref('oceanengine')
-const auditMediaTabs = [
-  { key: 'oceanengine', label: '巨量广告' },
-  { key: 'tencent3', label: '腾讯广告3.0' },
-  { key: 'tencent', label: '腾讯广告' },
-]
-const auditRecords = ref([
-  { id: 1, mid: 'PLT_780001', media: 'oceanengine', ad: '260701-混剪-副业-直播间-创意A', account: '上海纽泰仑教育 ID:67787382', status: 'PASS', suggestion: '通过', reject: '-' },
-  { id: 2, mid: 'PLT_780002', media: 'oceanengine', ad: '260701-混剪-副业-直播间-创意B', account: '上海纽泰仑教育 ID:80866414', status: 'REJECT', suggestion: '建议修改', reject: '含极限词“最”，请删除后重新提交' },
-  { id: 3, mid: 'PLT_780003', media: 'oceanengine', ad: '260701-岁寒知人心-创意C', account: '上海纽泰仑教育 ID:84370222', status: 'PENDING', suggestion: '审核中', reject: '-' },
-  { id: 4, mid: 'PLT_780004', media: 'tencent3', ad: '260701-校花网恋-创意D', account: '上海纽泰仑教育 ID:80866424', status: 'PASS', suggestion: '通过', reject: '-' },
-  { id: 5, mid: 'PLT_780005', media: 'tencent3', ad: '260701-校花网恋-创意E', account: '上海纽泰仑教育 ID:67787382', status: 'REJECT', suggestion: '建议修改', reject: '画面含二维码，需去除' },
-  { id: 6, mid: 'PLT_780006', media: 'tencent', ad: '260701-副业直播间-创意F', account: '上海纽泰仑教育 ID:84370222', status: 'PENDING', suggestion: '审核中', reject: '-' },
-])
-const auditCount = (media: string) => auditRecords.value.filter(r => r.media === media).length
-const filteredAuditRecords = computed(() => auditRecords.value.filter(r => r.media === auditMediaTab.value))
-
 // 播放倍速（点击切换）
 const dyRate = ref(1)
 const cycleDyRate = () => {
@@ -1930,6 +1910,8 @@ const usageBadgeClass = (usage?: string) => {
       return 'usage-run'
     case '无消耗':
       return 'usage-cold'
+    case '未推送':
+      return 'usage-push'
     default:
       return 'usage-none'
   }
@@ -2244,10 +2226,6 @@ const handleMoveMaterial = () => {
   showMoveDialog.value = true
 }
 
-const handlePreTest = () => {
-  showPreTestDialog.value = true
-}
-
 const handleConfirmPreTest = () => {
   console.log('Create pretest:', preTestForm.value)
   Message.success('提交成功，请您到【素材前测任务】查看任务进度。')
@@ -2416,20 +2394,6 @@ const onSeek = (e: MouseEvent) => {
   el.currentTime = ratio * dyDuration.value
 }
 
-const getTypeColor = (type: string) => {
-  const colors: Record<string, string> = { 'VIDEO': 'purple', 'IMAGE': 'cyan', 'AUDIO': 'orange' }
-  return colors[type] || 'default'
-}
-
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = { 'AUDIT_PASSED': 'green', 'AUDITING': 'blue', 'AUDIT_FAILED': 'red' }
-  return colors[status] || 'default'
-}
-
-const getStatusText = (status: string) => {
-  const texts: Record<string, string> = { 'AUDIT_PASSED': '审核通过', 'AUDITING': '审核中', 'AUDIT_FAILED': '审核失败' }
-  return texts[status] || status
-}
 </script>
 
 <style scoped lang="scss">
@@ -4289,6 +4253,7 @@ const getStatusText = (status: string) => {
 .detail-v2 .dv-usage.usage-hot { background: #FFECE8; color: #F53F3F; }
 .detail-v2 .dv-usage.usage-run { background: #E8F7EC; color: #00B42A; }
 .detail-v2 .dv-usage.usage-cold { background: #F2F3F5; color: #86909C; }
+.detail-v2 .dv-usage.usage-push { background: #FFF7E8; color: #FF7D00; }
 .detail-v2 .dv-usage.usage-none { background: #F2F3F5; color: #86909C; }
 
 .detail-v2 .dv-meta {
