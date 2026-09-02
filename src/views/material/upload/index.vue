@@ -705,7 +705,7 @@ const goBackToList = () => {
   // hash 模式下路径在 location.hash,需要判空避免循环
   setTimeout(() => {
     if (window.location.hash !== '#/material-lib/list') {
-      window.location.href = '/#/material-lib/list'
+      window.location.href = './#/material-lib/list'
     }
   }, 100)
 }

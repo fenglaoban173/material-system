@@ -86,7 +86,7 @@ const goToTarget = (item: Notification) => {
 
 const viewAll = () => {
   // 在新窗口打开消息中心列表
-  window.open('/#/messages', '_blank', 'noopener,noreferrer')
+  window.open('./#/messages', '_blank', 'noopener,noreferrer')
 }
 
 // 暴露 notifications 给父组件（用于未读数实时同步）
