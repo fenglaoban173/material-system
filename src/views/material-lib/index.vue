@@ -1474,7 +1474,7 @@ const accountTableData = ref([
 
 // 新窗口打开上传素材页面
 const openUploadWindow = () => {
-  window.open('/material-demand/upload', '_blank')
+  window.open('/#/material-demand/upload', '_blank')
 }
 const newFolderForm = ref({
   level: 1,

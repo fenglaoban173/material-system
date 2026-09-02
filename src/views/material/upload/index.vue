@@ -702,9 +702,10 @@ const handleRemove = (record: UploadedFile) => {
 const goBackToList = () => {
   window.close()
   // window.close 在用户主动打开的窗口才生效;以防无效,降级跳回列表
+  // hash 模式下路径在 location.hash,需要判空避免循环
   setTimeout(() => {
-    if (window.location.pathname !== '/material-lib/list') {
-      window.location.href = '/material-lib/list'
+    if (window.location.hash !== '#/material-lib/list') {
+      window.location.href = '/#/material-lib/list'
     }
   }, 100)
 }

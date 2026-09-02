@@ -68,7 +68,7 @@ request.interceptors.response.use(
           Message.error('登录已过期，请重新登录')
           const userStore = useUserStore()
           userStore.logout()
-          window.location.href = '/login'
+          window.location.href = '/#/login'
           break
         case 403:
           Message.error('没有权限执行此操作')
