@@ -1024,10 +1024,12 @@ const resetItemEditorList = () => {
 }
 
 const statusLogs = ref([
+  { time: '2026-10-19 09:24:44', actor: '李摄像', action: '完成摄像任务,共交付 4 条视频', color: 'green' },
+  { time: '2026-10-19 09:18:12', actor: '张编导', action: '完成编导任务,共交付 6 条脚本', color: 'green' },
   { time: '2024-06-18 09:30', actor: '张经理', action: '发布了视频需求', color: 'green' },
-  { time: '2024-06-18 10:15', actor: '张经理', action: '指派给了个人（郭振宇、张三）', color: 'blue' },
-  { time: '2024-06-18 14:20', actor: '郭振宇', action: '开始处理需求', color: 'blue' },
-  { time: '2024-06-19 16:30', actor: '张三', action: '上传了3个素材', color: 'cyan' },
+  { time: '2024-06-18 10:15', actor: '张经理', action: '指派给了个人（张编导、李摄像）', color: 'blue' },
+  { time: '2024-06-18 14:20', actor: '张编导', action: '开始处理需求', color: 'blue' },
+  { time: '2024-06-19 16:30', actor: '李摄像', action: '上传了 3 个拍摄素材', color: 'cyan' },
 ])
 const createFormRef = ref()
 const copyFormRef = ref()
@@ -1279,6 +1281,8 @@ const TYPE_PATH_TEXT: Record<string, string> = {
   VIDEO_MIXCUT: '视频-混剪',
   VIDEO_TALK: '视频-单人口播',
   VIDEO_STORY: '视频-剧情',
+  VIDEO_SCRIPT: '视频-脚本撰写',
+  VIDEO_SHOOT: '视频-视频摄像',
   // 混剪孙子级
   VIDEO_MIXCUT_BKN: '视频-混剪-爆款裂变',
   VIDEO_MIXCUT_JTQ: '视频-混剪-加前后贴',
@@ -1483,6 +1487,8 @@ const typeOptions = [
           { label: '多人剧情', value: 'VIDEO_STORY_MULTI' },
         ],
       },
+      { label: '脚本撰写', value: 'VIDEO_SCRIPT' },
+      { label: '视频摄像', value: 'VIDEO_SHOOT' },
     ],
   },
   {

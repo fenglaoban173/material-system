@@ -140,6 +140,15 @@
               >
                 <span :style="{ color: record.status === 'PENDING' ? '#00B42A' : '#C9CDD4' }">接单</span>
               </a-button>
+              <a-button
+                v-if="isCompleteRole(record.editorRole) && record.status !== 'COMPLETED'"
+                type="text"
+                size="mini"
+                :disabled="record.status === 'PENDING'"
+                @click="handleComplete(record)"
+              >
+                <span :style="{ color: record.status === 'PENDING' ? '#C9CDD4' : '#00B42A' }">完成</span>
+              </a-button>
               <a-button type="text" size="mini" @click="handleDetails(record)">
                 <span style="color:#165DFF">详情</span>
               </a-button>
@@ -410,11 +419,108 @@
         <video :src="currentVideoSrc" controls autoplay style="width: 100%; height: 500px;"></video>
       </div>
     </a-modal>
+
+    <!-- 完成工单弹窗: 按角色分发字段 -->
+    <!--   - 编导: 脚本附件 + 脚本条数(1 ~ 已分配数) -->
+    <!--   - 摄像: 视频网盘地址 + 视频条数(必须 = 已分配数) -->
+    <a-modal
+      v-model:visible="showCompleteModal"
+      :title="`完成工单 · ${completeRole}`"
+      :width="560"
+      :ok-text="'提交完成'"
+      :ok-button-props="{ disabled: !completeValid }"
+      :confirm-loading="submittingComplete"
+      unmount-on-close
+      @ok="submitComplete"
+      @cancel="cancelComplete"
+    >
+      <div class="complete-modal">
+        <a-alert
+          v-if="completeTarget"
+          type="info"
+          show-icon
+          style="margin-bottom: 16px;"
+        >
+          <template #title>
+            完成「{{ completeTarget.name }}」 · {{ completeTarget.editorRole }} · {{ completeTarget.editor }} 的工单
+          </template>
+        </a-alert>
+
+        <a-form :model="completeForm" layout="vertical">
+          <!-- 编导: 脚本附件 + 脚本条数 -->
+          <template v-if="completeRole === '编导'">
+            <a-form-item label="脚本附件" required>
+              <a-upload
+                :file-list="completeForm.fileList"
+                :auto-upload="false"
+                :limit="1"
+                :accept="'.doc,.docx,.pdf,.txt,.md,.zip'"
+                list-type="text"
+                drag
+                tip-text="支持 doc / docx / txt / pdf / md / zip,单文件不超过 10MB"
+                @change="handleUploadChange"
+                @before-remove="handleUploadBeforeRemove"
+              />
+            </a-form-item>
+            <a-form-item label="脚本条数" required>
+              <a-input-number
+                v-model="completeForm.scriptCount"
+                :min="1"
+                :max="getEditorMaxCount(completeTarget)"
+                :step="1"
+                :precision="0"
+                placeholder="请输入脚本条数"
+                style="width: 100%;"
+              />
+              <div class="form-tip">
+                分配给「
+                <span class="form-tip-strong">{{ completeTarget?.editor }}</span>
+                」的素材数量共
+                <span class="form-tip-strong">{{ getEditorMaxCount(completeTarget) }}</span>
+                条,脚本条数不能超过该数量
+              </div>
+            </a-form-item>
+          </template>
+
+          <!-- 摄像: 视频网盘地址 + 视频条数 -->
+          <template v-else-if="completeRole === '摄像'">
+            <a-form-item label="视频网盘地址" required>
+              <a-input
+                v-model="completeForm.videoUrl"
+                placeholder="请输入视频网盘链接,如 https://pan.baidu.com/..."
+                allow-clear
+                :max-length="500"
+              />
+            </a-form-item>
+            <a-form-item label="视频条数" required>
+              <a-input-number
+                v-model="completeForm.videoCount"
+                :min="1"
+                :max="getEditorMaxCount(completeTarget)"
+                :step="1"
+                :precision="0"
+                placeholder="请输入视频条数"
+                style="width: 100%;"
+              />
+              <div class="form-tip">
+                分配给「
+                <span class="form-tip-strong">{{ completeTarget?.editor }}</span>
+                」的素材数量共
+                <span class="form-tip-strong">{{ getEditorMaxCount(completeTarget) }}</span>
+                条,视频条数必须
+                <span class="form-tip-strong">等于</span>
+                该数量,不能超过
+              </div>
+            </a-form-item>
+          </template>
+        </a-form>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, reactive, watch } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import type { MaterialItem } from '@/types/material'
 
@@ -468,10 +574,12 @@ const typeOptions = [
 
 // 需求进度记录(详情弹窗时间线)
 const statusLogs = ref([
+  { time: '2026-10-19 09:24:44', actor: '李摄像', action: '完成摄像任务,共交付 4 条视频', color: 'green' },
+  { time: '2026-10-19 09:18:12', actor: '张编导', action: '完成编导任务,共交付 6 条脚本', color: 'green' },
   { time: '2024-06-18 09:30', actor: '张经理', action: '发布了视频需求', color: 'green' },
-  { time: '2024-06-18 10:15', actor: '张经理', action: '指派给了个人（郭振宇、张三）', color: 'blue' },
-  { time: '2024-06-18 14:20', actor: '郭振宇', action: '开始处理需求', color: 'blue' },
-  { time: '2024-06-19 16:30', actor: '张三', action: '上传了3个素材', color: 'cyan' },
+  { time: '2024-06-18 10:15', actor: '张经理', action: '指派给了个人（张编导、李摄像）', color: 'blue' },
+  { time: '2024-06-18 14:20', actor: '张编导', action: '开始处理需求', color: 'blue' },
+  { time: '2024-06-19 16:30', actor: '李摄像', action: '上传了 3 个拍摄素材', color: 'cyan' },
 ])
 
 // 末级 typePath 中文映射
@@ -559,12 +667,12 @@ const tableData = ref([
     id: 1, name: '618大促活动宣传素材', demandId: 'REQ202406180001',
     status: 'PROCESSING', source: '代运营',
     materialItems: [{ typePath: ['VIDEO', 'VIDEO_TALK'], format: '竖版视频', count: 10 }],
-    editorAssignments: { 0: [{ name: '张剪辑师', count: 6, status: 'accepted' }, { name: '李剪辑师', count: 4, status: 'pending' }] },
+    editorAssignments: { 0: [{ name: '张编导', role: '编导', count: 6, status: 'accepted' }, { name: '李摄像', role: '摄像', count: 4, status: 'accepted' }] },
     uploadedCount: 8,
     createTime: '2024-06-18 09:30', expectedFinishTime: '2024-06-25 18:00', finishTime: '-',
     groupName: '阿里巴巴集团', customerName: '某知名电商客户', dailyCost: 25000,
     media: ['抖音', '快手'], description: '618大促活动宣传视频素材,需要突出优惠力度',
-    creator: '张经理', editor: '张剪辑师 / 李剪辑师',
+    creator: '张经理', editor: '张编导 / 李摄像',
     creators: [
       { name: '李设计师', status: '制作中', statusColor: 'blue', materials: [{ typePath: ['VIDEO', 'VIDEO_TALK'], format: '竖版视频', count: 3 }] },
       { name: '王设计师', status: '待分配', statusColor: 'orange' },
@@ -649,15 +757,15 @@ const tableData = ref([
       { typePath: ['IMAGE', 'IMAGE_DETAIL'], format: '详情页', count: 4 },
     ],
     editorAssignments: {
-      0: [{ name: '王剪辑师', count: 5, status: 'accepted' }],
-      1: [{ name: '王剪辑师', count: 3, status: 'pending' }, { name: '孙剪辑师', count: 3, status: 'pending' }],
-      2: [{ name: '王剪辑师', count: 4, status: 'pending' }],
+      0: [{ name: '王编导', role: '编导', count: 5, status: 'accepted' }],
+      1: [{ name: '王剪辑师', role: '剪辑师', count: 3, status: 'pending' }, { name: '孙剪辑师', role: '剪辑师', count: 3, status: 'pending' }],
+      2: [{ name: '王剪辑师', role: '剪辑师', count: 4, status: 'pending' }],
     },
     uploadedCount: 0,
     createTime: '2024-06-20 09:00', expectedFinishTime: '2024-07-01 18:00', finishTime: '-',
     groupName: '腾讯集团', customerName: '某零食品牌', dailyCost: 30000,
     media: ['抖音', '快手'], description: '双十一活动预热视频,突出促销力度',
-    creator: '李经理', editor: '王剪辑师 / 孙剪辑师',
+    creator: '李经理', editor: '王编导 / 王剪辑师 / 孙剪辑师',
     creators: [
       { name: '待指派', status: '待分配', statusColor: 'orange' },
       { name: '周设计师', status: '待分配', statusColor: 'orange' },
@@ -800,7 +908,7 @@ const filteredRecords = computed(() => {
 // 将过滤后的需求拍平: 每个 (需求 × 剪辑师) 生成一张卡
 // 1) 该需求未分配或所有 item 都空: 1 张 "待指派" 占位卡
 // 2) 该需求被分配给 N 个剪辑师: N 张卡, 每张聚合该剪辑师在所有 typePath 上的 count
-type EditorAssign = { name: string; count: number; status: string }
+type EditorAssign = { name: string; count: number; status: string; role?: string }
 type EditorAssignMap = Record<number, EditorAssign[]>
 
 const flatCardList = computed(() => {
@@ -809,6 +917,8 @@ const flatCardList = computed(() => {
     const assignments = (record.editorAssignments || {}) as EditorAssignMap
     // 按剪辑师聚合: editorName -> [{ typeIdx, typeText, color, format, count, total, status }]
     const editorMap: Record<string, any[]> = {}
+    // 同时记下每个 editor 的 role(从任意一条分配中读取,role 全局唯一)
+    const editorRoleMap: Record<string, string> = {}
     ;(record.materialItems || []).forEach((item: any, idx: number) => {
       const list = assignments[idx] || []
       for (const e of list) {
@@ -822,6 +932,7 @@ const flatCardList = computed(() => {
           total: Number(item.count) || 0,
           status: e.status,
         })
+        if (e.role && !editorRoleMap[e.name]) editorRoleMap[e.name] = e.role
       }
     })
 
@@ -835,6 +946,7 @@ const flatCardList = computed(() => {
       cards.push({
         ...record,
         editor: name,
+        editorRole: editorRoleMap[name] || '',
         editorLines: editorMap[name],
       })
     }
@@ -892,6 +1004,185 @@ const handleAccept = (record: any) => {
       Message.success('已接单')
     },
   })
+}
+
+// ========== 完成工单(编导 / 摄像) ==========
+
+const showCompleteModal = ref(false)
+const submittingComplete = ref(false)
+const completeTarget = ref<any>(null)
+// 当前完成弹窗对应的角色(编导 / 摄像)
+const completeRole = ref<'编导' | '摄像' | ''>('')
+
+// 拥有「完成」按钮的角色集合
+const COMPLETE_ROLES = ['编导', '摄像'] as const
+const isCompleteRole = (role?: string): boolean =>
+  !!role && (COMPLETE_ROLES as readonly string[]).includes(role)
+
+const completeForm = reactive<{
+  // 编导
+  scriptCount: number
+  fileList: any[]
+  // 摄像
+  videoUrl: string
+  videoCount: number
+}>({
+  scriptCount: 1,
+  fileList: [],
+  videoUrl: '',
+  videoCount: 1,
+})
+
+// 单文件最大 10MB
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+
+// 允许的脚本附件扩展名(小写匹配)
+const ALLOWED_EXTS = ['.doc', '.docx', '.pdf', '.txt', '.md', '.zip']
+
+// 网盘链接正则: http(s):// 主机名/路径 / 域名 + 路径
+const URL_REGEX = /^https?:\/\/[\w.-]+(?::\d+)?(\/[\w\-./?%&=#:+@~!$,'()*;]*)?$/i
+
+// 该卡片分配给对应剪辑师的总素材数量 = 所有 typePath × format 上 count 的累加
+const getEditorMaxCount = (record: any): number => {
+  if (!record?.editorLines?.length) return 0
+  return record.editorLines.reduce(
+    (sum: number, line: any) => sum + (Number(line.count) || 0),
+    0
+  )
+}
+
+const resetCompleteForm = () => {
+  completeForm.scriptCount = 1
+  completeForm.fileList = []
+  completeForm.videoUrl = ''
+  completeForm.videoCount = 1
+}
+
+const handleComplete = (record: any) => {
+  if (record.status === 'PENDING') {
+    Message.warning('请先接单后再完成')
+    return
+  }
+  if (record.status === 'COMPLETED') {
+    Message.warning('该工单已完成')
+    return
+  }
+  if (!isCompleteRole(record.editorRole)) {
+    Message.warning('当前角色不支持此完成流程')
+    return
+  }
+  completeTarget.value = record
+  completeRole.value = record.editorRole as '编导' | '摄像'
+  resetCompleteForm()
+  // 摄像: 视频条数必须 = 分配数,默认填最大值
+  const max = getEditorMaxCount(record)
+  if (completeRole.value === '摄像') {
+    completeForm.videoCount = max > 0 ? max : 1
+  }
+  showCompleteModal.value = true
+}
+
+const handleUploadChange = (fileList: any[]) => {
+  // 过滤超大文件 / 不支持格式
+  const filtered = fileList.filter((f: any) => {
+    const file: File | undefined = f.file
+    if (file && file.size > MAX_UPLOAD_SIZE) {
+      Message.warning(`文件 ${f.name} 超过 10MB 限制,已自动忽略`)
+      return false
+    }
+    const lowerName = (f.name || '').toLowerCase()
+    if (!ALLOWED_EXTS.some((ext) => lowerName.endsWith(ext))) {
+      Message.warning(`文件 ${f.name} 格式不支持`)
+      return false
+    }
+    return true
+  })
+  completeForm.fileList = filtered
+}
+
+const handleUploadBeforeRemove = async () => true
+
+// 校验: 按当前角色走不同规则
+const completeValid = computed(() => {
+  if (!completeTarget.value || !completeRole.value) return false
+  const max = getEditorMaxCount(completeTarget.value)
+  if (completeRole.value === '编导') {
+    if (!completeForm.fileList.length) return false
+    const cnt = Number(completeForm.scriptCount)
+    if (!cnt || cnt < 1) return false
+    if (cnt > max) return false
+    return true
+  }
+  if (completeRole.value === '摄像') {
+    const url = (completeForm.videoUrl || '').trim()
+    if (!url || !URL_REGEX.test(url)) return false
+    const cnt = Number(completeForm.videoCount)
+    if (!cnt || cnt < 1) return false
+    // 摄像: 视频条数必须等于分配数量,不能超过
+    if (cnt !== max) return false
+    return true
+  }
+  return false
+})
+
+const cancelComplete = () => {
+  showCompleteModal.value = false
+  completeTarget.value = null
+  completeRole.value = ''
+  resetCompleteForm()
+}
+
+const submitComplete = async () => {
+  if (!completeValid.value || !completeTarget.value || !completeRole.value) return
+  submittingComplete.value = true
+  try {
+    const target = completeTarget.value
+    const role = completeRole.value
+
+    // 模拟上传/校验耗时
+    await new Promise((resolve) => setTimeout(resolve, 600))
+
+    // 根据角色计算最终交付数量 + timeline 文案
+    let deliveredCount = 0
+    let actionText = ''
+    if (role === '编导') {
+      deliveredCount = Number(completeForm.scriptCount)
+      actionText = `完成编导任务,共交付 ${deliveredCount} 条脚本`
+    } else if (role === '摄像') {
+      deliveredCount = Number(completeForm.videoCount)
+      actionText = `完成摄像任务,共交付 ${deliveredCount} 条视频`
+    }
+
+    // 找到 tableData 中对应的源记录并更新
+    const source = tableData.value.find((r: any) => r.id === target.id)
+    if (source) {
+      source.uploadedCount = deliveredCount
+      source.status = 'COMPLETED'
+      source.finishTime = formatNow()
+      const actorName = target.editor || '编辑'
+      statusLogs.value.unshift({
+        time: formatNow(),
+        actor: actorName,
+        action: actionText,
+        color: 'green',
+      })
+    }
+    Message.success('工单已完成')
+    showCompleteModal.value = false
+    completeTarget.value = null
+    completeRole.value = ''
+    resetCompleteForm()
+  } catch (err) {
+    Message.error((err as Error).message || '提交失败')
+  } finally {
+    submittingComplete.value = false
+  }
+}
+
+const formatNow = (): string => {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
 const openVideoModal = (src: string) => {
@@ -1512,6 +1803,24 @@ const getStatusStepIndex = (status?: string) => {
     .log-action {
       color: var(--color-text-2);
     }
+  }
+}
+
+// 完成工单弹窗样式
+.complete-modal {
+  padding: 4px 0 0;
+
+  .form-tip {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--color-text-3);
+    line-height: 1.6;
+  }
+
+  .form-tip-strong {
+    color: var(--color-primary-6);
+    font-weight: 600;
+    margin: 0 2px;
   }
 }
 

@@ -50,6 +50,8 @@ export const MATERIAL_TYPE_OPTIONS: MaterialTypeOption[] = [
           { label: '多人剧情', value: 'VIDEO_STORY_MULTI' },
         ],
       },
+      { label: '脚本撰写', value: 'VIDEO_SCRIPT' },
+      { label: '视频摄像', value: 'VIDEO_SHOOT' },
     ],
   },
   {
