@@ -78,6 +78,12 @@
               <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
             </template>
           </a-table-column>
+          <a-table-column title="当前审核人" :width="140">
+            <template #cell="{ record }">
+              <span v-if="record.currentReviewer" class="current-reviewer">{{ record.currentReviewer }}</span>
+              <span v-else class="muted">待分配</span>
+            </template>
+          </a-table-column>
           <a-table-column title="发起人" :width="140">
             <template #cell="{ record }">
               <div class="creator-cell">
@@ -935,6 +941,7 @@ const tableData = ref([
     comment: '09',
     screenshot: 'https://picsum.photos/seed/audit1/120/68',
     reviewer: '王春雷',
+    currentReviewer: '王春雷',
     reviewTime: '2026-07-28 15:19:50',
   },
   {
@@ -949,6 +956,7 @@ const tableData = ref([
     comment: '测试仪',
     screenshot: 'https://picsum.photos/seed/audit2/120/68',
     reviewer: '王春雷',
+    currentReviewer: '王春雷',
     reviewTime: '2026-07-28 15:03:05',
   },
   {
@@ -963,6 +971,7 @@ const tableData = ref([
     comment: '-',
     screenshot: '',
     reviewer: '',
+    currentReviewer: '赵审核',
     reviewTime: '',
   },
   {
@@ -977,6 +986,7 @@ const tableData = ref([
     comment: '-',
     screenshot: '',
     reviewer: '',
+    currentReviewer: '',
     reviewTime: '',
   },
   {
@@ -991,6 +1001,7 @@ const tableData = ref([
     comment: '通过',
     screenshot: '',
     reviewer: '陈经理',
+    currentReviewer: '陈经理',
     reviewTime: '2026-07-28 11:30:21',
   },
   {
@@ -1005,6 +1016,7 @@ const tableData = ref([
     comment: '通过',
     screenshot: '',
     reviewer: '梁总',
+    currentReviewer: '梁总',
     reviewTime: '2026-07-28 11:00:08',
   },
   {
@@ -1019,6 +1031,7 @@ const tableData = ref([
     comment: '-',
     screenshot: '',
     reviewer: '',
+    currentReviewer: '钱审核',
     reviewTime: '',
   },
 ])
