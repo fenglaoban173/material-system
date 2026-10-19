@@ -30,7 +30,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # 使用 npm install + --legacy-peer-deps,绕开 npm 10.x 在某些依赖图上的
+        # "Cannot read properties of null (reading 'edgesOut')" 错误
+        # (原 2026-09 之前可正常 npm ci,但 2026-10 之后偶发该错误,导致 GitHub Pages 一直停留在 9-7 的旧构建)
+        run: npm install --no-audit --legacy-peer-deps
 
       - name: Build
         run: npm run build
