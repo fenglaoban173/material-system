@@ -167,6 +167,24 @@ const routes: RouteRecordRaw[] = [
               icon: 'icon-clock-circle',
             },
           },
+          {
+            path: '/report/media-consumption',
+            name: 'MediaConsumption',
+            component: () => import('@/views/report/media-consumption/index.vue'),
+            meta: {
+              title: '媒体消耗报表',
+              icon: 'icon-bar-chart',
+            },
+          },
+          {
+            path: '/report/import-tasks',
+            name: 'ImportTasks',
+            component: () => import('@/views/report/import-tasks/index.vue'),
+            meta: {
+              title: '导入任务记录',
+              icon: 'icon-history',
+            },
+          },
         ],
       },
       {

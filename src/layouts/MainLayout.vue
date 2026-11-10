@@ -153,6 +153,7 @@ import {
   IconClockCircle,
   IconUser,
   IconUpload,
+  IconBarChart,
 } from '@arco-design/web-vue/es/icon'
 import BreadcrumbNav from './components/BreadcrumbNav.vue'
 import NotificationPanel from './components/NotificationPanel.vue'
@@ -200,6 +201,7 @@ const iconMap: Record<string, any> = {
   'icon-clock-circle': IconClockCircle,
   'icon-user': IconUser,
   'icon-upload': IconUpload,
+  'icon-bar-chart': IconBarChart,
 }
 
 const getIcon = (iconName?: string) => {
